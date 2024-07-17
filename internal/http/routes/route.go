@@ -2,20 +2,23 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+
+	"Messaggio/internal/http/handlers"
 )
 
 type Route struct {
-	Handlers []gin.HandlerFunc
+	handlers *handlers.Handlers
 	router   *gin.RouterGroup
 }
 
-func (r *Route) NewRoute() *Route {
-	return &Route{}
+func NewRoute(router *gin.RouterGroup) *Route {
+	return &Route{
+		router: router,
+	}
 }
 
 func (r *Route) Routes() {
 	{
-		r.router.POST("/")
-		r.router.GET("/")
+		r.router.GET("/", r.handlers.SayHello)
 	}
 }
