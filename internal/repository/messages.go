@@ -78,11 +78,8 @@ func (p *Postgres) EditMessage(c *gin.Context, id string, message entity.Message
 		RETURNING *;
 	`
 	err := p.db.GetContext(c, &dbMessage, query, message.Message, id)
-	if err != nil {
-		return nil, err
-	}
 
-	return &dbMessage, nil
+	return &dbMessage, err
 }
 
 func (p *Postgres) GetStats(c *gin.Context) (*entity.Statistic, error) {

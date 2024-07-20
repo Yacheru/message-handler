@@ -8,7 +8,7 @@ type Response struct {
 	Data        interface{} `json:"data,omitempty"`
 }
 
-func NewSuccessResponse(c *gin.Context, statusCode int, description string, data ...interface{}) {
+func NewSuccessResponse(c *gin.Context, statusCode int, description string, data interface{}) {
 	c.AbortWithStatusJSON(statusCode, Response{
 		Status:      statusCode,
 		Description: description,

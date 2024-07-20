@@ -29,5 +29,3 @@ DROP TABLE IF EXISTS messages;
 
 DROP FUNCTION update_updated_at_column
 -- +goose StatementEnd
-
--- goose -dir schema postgres 'postgresql://Messaggio:somestrongpassword@localhost:5432/db_messages' down
