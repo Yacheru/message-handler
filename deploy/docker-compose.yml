@@ -3,14 +3,37 @@ services:
     user: root
     container_name: message-handler
     ports:
-      - 8080:8080
+      - ${API_PORT}:${API_PORT}
     expose:
       - 9092
     build:
       context: ../
       dockerfile: ./deploy/Dockerfile
     depends_on:
-      - kafka-1
+      kafka-1:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    networks:
+      - message-network
+
+  postgres:
+    user: root
+    container_name: postgres
+    image: postgres:14.12-alpine3.20
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?error}
+      POSTGRES_USER: ${POSTGRES_USER?error}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?error}
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+    volumes:
+      - ./pg-data:/postgresql/data
     networks:
       - message-network
 
@@ -34,6 +57,7 @@ services:
 
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_LISTENERS: INTERNAL://kafka-1:9092,OUTSIDE://kafka-1:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:9092,OUTSIDE://kafka-1:9095
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
 
       KAFKA_LOG_DIRS: /kafka/logs

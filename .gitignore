@@ -1,0 +1,4 @@
+.idea
+build
+deploy/kafka-data
+deploy/pg-data

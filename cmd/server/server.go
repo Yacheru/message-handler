@@ -1,8 +1,6 @@
 package server
 
 import (
-	"Messaggio/init/config"
-	"Messaggio/internal/kafka/consumer"
 	"context"
 	"net/http"
 	"os"
@@ -13,8 +11,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
+	"Messaggio/init/config"
 	"Messaggio/init/logger"
 	"Messaggio/internal/http/routes"
+	"Messaggio/internal/kafka/producer"
+	"Messaggio/internal/repository"
 	"Messaggio/pkg/constants"
 )
 
@@ -25,7 +26,9 @@ type Server struct {
 func NewServer() (*Server, error) {
 	ctx := context.Background()
 
-	err := consumer.NewConsumerGroup(ctx, config.ServerConfig.KafkaTopics)
+	db, err := repository.NewPostgresConnection(config.ServerConfig.PSQLDsn)
+
+	KafkaProducer, err := producer.NewKafkaProducer([]string{config.ServerConfig.KafkaBroker}, []string{config.ServerConfig.KafkaTopic})
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +36,7 @@ func NewServer() (*Server, error) {
 	router := setupRouter()
 
 	api := router.Group("/messaggio")
-	routes.NewRoute(api).Routes()
+	routes.NewRoute(ctx, api, KafkaProducer, db, []string{config.ServerConfig.KafkaTopic}).Routes()
 
 	server := &http.Server{
 		Addr:           ":" + config.ServerConfig.APIPort,

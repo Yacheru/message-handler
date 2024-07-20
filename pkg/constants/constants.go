@@ -1,5 +1,6 @@
 package constants
 
 const (
-	Server = "server"
+	Server   = "server"
+	Handlers = "handlers"
 )

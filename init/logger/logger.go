@@ -2,6 +2,7 @@ package logger
 
 import (
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -13,9 +14,12 @@ func init() {
 
 	log.SetOutput(os.Stdout)
 
+	log.SetLevel(logrus.DebugLevel)
+
 	log.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp: true,
-		ForceColors:   true,
+		FullTimestamp:   true,
+		ForceColors:     true,
+		TimestampFormat: time.DateTime,
 	})
 }
 

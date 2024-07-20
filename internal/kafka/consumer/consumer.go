@@ -1,36 +1,55 @@
 package consumer
 
 import (
+	"Messaggio/init/logger"
+	"Messaggio/internal/entity"
+	"Messaggio/internal/repository"
+	"Messaggio/pkg/constants"
+	"context"
+	"encoding/json"
 	"github.com/IBM/sarama"
+	"github.com/sirupsen/logrus"
 )
 
 type Consumer struct {
-	Topic []string
+	Topic    []string
+	postgres *repository.Postgres
+	ctx      context.Context
 }
 
-func NewConsumer(topic []string) *Consumer {
+func NewKafkaConsumer(topic []string, postgres *repository.Postgres, ctx context.Context) *Consumer {
 	return &Consumer{
-		Topic: topic,
+		Topic:    topic,
+		postgres: postgres,
+		ctx:      ctx,
 	}
 }
 
 func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	var dbMessage entity.DBMessage
 
-	go func() {
+	for {
 		select {
 		case <-session.Context().Done():
 			session.Commit()
 		default:
 			for msg := range claim.Messages() {
+				logger.DebugF("claimed message: %v", logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer}, string(msg.Value))
 
-				// Место для обработки полученного сообщения
+				err := json.Unmarshal(msg.Value, &dbMessage)
+				if err != nil {
+					return err
+				}
 
-				session.MarkMessage(msg, "")
+				err = c.postgres.Mark(c.ctx, dbMessage.ID)
+				if err != nil {
+					return err
+				}
+
+				session.MarkMessage(msg, "mark message!")
 			}
 		}
-	}()
-
-	return nil
+	}
 }
 
 func (c *Consumer) Setup(sarama.ConsumerGroupSession) error {

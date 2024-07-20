@@ -3,22 +3,22 @@ package handlers
 import "github.com/gin-gonic/gin"
 
 type Response struct {
-	Status  int    `json:"status"`
-	Message string `json:"message,omitempty"`
-	Data    any    `json:"data,omitempty"`
+	Status      int         `json:"status"`
+	Description string      `json:"description"`
+	Data        interface{} `json:"data,omitempty"`
 }
 
-func NewSuccessResponse(c *gin.Context, statusCode int, message string, data any) {
+func NewSuccessResponse(c *gin.Context, statusCode int, description string, data ...interface{}) {
 	c.AbortWithStatusJSON(statusCode, Response{
-		Status:  statusCode,
-		Message: message,
-		Data:    data,
+		Status:      statusCode,
+		Description: description,
+		Data:        data,
 	})
 }
 
-func NewErrorResponse(c *gin.Context, statusCode int, message string) {
+func NewErrorResponse(c *gin.Context, statusCode int, description string) {
 	c.AbortWithStatusJSON(statusCode, Response{
-		Status:  statusCode,
-		Message: message,
+		Status:      statusCode,
+		Description: description,
 	})
 }

@@ -14,20 +14,20 @@ type Config struct {
 	APIPort  string `mapstructure:"API_PORT"`
 	APIDebug bool   `mapstructure:"API_DEBUG"`
 
-	KafkaConsumerGroup string   `mapstructure:"KAFKA_CONSUMER_GROUP"`
-	KafkaBrokers       []string `mapstructure:"KAFKA_BROKERS"`
-	KafkaTopics        []string `mapstructure:"KAFKA_TOPICS"`
+	KafkaConsumerGroup string `mapstructure:"KAFKA_CONSUMER_GROUP"`
+	KafkaBroker        string `mapstructure:"KAFKA_BROKER"`
+	KafkaTopic         string `mapstructure:"KAFKA_TOPIC"`
 
-	PSQLHost     string `mapstructure:"POSTGRES_HOST"`
 	PSQLPassword string `mapstructure:"POSTGRES_PASSWORD"`
 	PSQLUser     string `mapstructure:"POSTGRES_USER"`
 	PSQLDb       string `mapstructure:"POSTGRES_DB"`
+	PSQLDsn      string `mapstructure:"POSTGRES_DSN"`
 }
 
 func InitConfig() error {
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath("./configs")
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -44,8 +44,8 @@ func InitConfig() error {
 	}
 
 	if ServerConfig.APIPort == "" ||
-		len(ServerConfig.KafkaTopics) == 0 || len(ServerConfig.KafkaBrokers) == 0 ||
-		ServerConfig.PSQLPassword == "" || ServerConfig.PSQLHost == "" {
+		ServerConfig.KafkaTopic == "" || ServerConfig.KafkaBroker == "" ||
+		ServerConfig.PSQLPassword == "" || ServerConfig.PSQLDb == "" || ServerConfig.PSQLDsn == "" || ServerConfig.PSQLUser == "" {
 		logger.Error("missing requirement variable!", logrus.Fields{constants.LoggerCategory: constants.Config})
 
 		return constants.ErrMissVar
