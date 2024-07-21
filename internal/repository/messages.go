@@ -16,7 +16,7 @@ func NewPostgres(db *sqlx.DB) *Postgres {
 	return &Postgres{db}
 }
 
-func (p *Postgres) InsertNew(c *gin.Context, message entity.Message) (*entity.DBMessage, error) {
+func (p *Postgres) InsertNew(ctx *gin.Context, message entity.Message) (*entity.DBMessage, error) {
 	var dbMessage entity.DBMessage
 
 	query := `
@@ -24,12 +24,12 @@ func (p *Postgres) InsertNew(c *gin.Context, message entity.Message) (*entity.DB
 		VALUES ($1, $2)
 		RETURNING *;
 	`
-	err := p.db.GetContext(c, &dbMessage, query, uuid.New(), message.Message)
+	err := p.db.GetContext(ctx.Request.Context(), &dbMessage, query, uuid.New(), message.Message)
 
 	return &dbMessage, err
 }
 
-func (p *Postgres) GetAll(c *gin.Context) ([]entity.DBMessage, error) {
+func (p *Postgres) GetAll(ctx *gin.Context) ([]entity.DBMessage, error) {
 	var dbMessages []entity.DBMessage
 
 	query := `
@@ -37,12 +37,12 @@ func (p *Postgres) GetAll(c *gin.Context) ([]entity.DBMessage, error) {
 		FROM messages 
 		ORDER BY created_at DESC;
 	`
-	err := p.db.SelectContext(c, &dbMessages, query)
+	err := p.db.SelectContext(ctx.Request.Context(), &dbMessages, query)
 
 	return dbMessages, err
 }
 
-func (p *Postgres) GetById(c *gin.Context, id string) (entity.DBMessage, error) {
+func (p *Postgres) GetById(ctx *gin.Context, id string) (entity.DBMessage, error) {
 	var dbMessage entity.DBMessage
 
 	query := `
@@ -50,12 +50,12 @@ func (p *Postgres) GetById(c *gin.Context, id string) (entity.DBMessage, error) 
 		FROM messages 
 		WHERE id = $1;
 	`
-	err := p.db.GetContext(c, &dbMessage, query, id)
+	err := p.db.GetContext(ctx.Request.Context(), &dbMessage, query, id)
 
 	return dbMessage, err
 }
 
-func (p *Postgres) DeleteMessage(c *gin.Context, id string) (entity.DBMessage, error) {
+func (p *Postgres) DeleteMessage(ctx *gin.Context, id string) (entity.DBMessage, error) {
 	var dbMessage entity.DBMessage
 
 	query := `
@@ -63,12 +63,12 @@ func (p *Postgres) DeleteMessage(c *gin.Context, id string) (entity.DBMessage, e
 		WHERE id = $1 
 		RETURNING *;
 	`
-	err := p.db.GetContext(c, &dbMessage, query, id)
+	err := p.db.GetContext(ctx.Request.Context(), &dbMessage, query, id)
 
 	return dbMessage, err
 }
 
-func (p *Postgres) EditMessage(c *gin.Context, id string, message entity.Message) (*entity.DBMessage, error) {
+func (p *Postgres) EditMessage(ctx *gin.Context, id string, message entity.Message) (*entity.DBMessage, error) {
 	var dbMessage entity.DBMessage
 
 	query := `
@@ -77,12 +77,12 @@ func (p *Postgres) EditMessage(c *gin.Context, id string, message entity.Message
 		WHERE id = $2
 		RETURNING *;
 	`
-	err := p.db.GetContext(c, &dbMessage, query, message.Message, id)
+	err := p.db.GetContext(ctx.Request.Context(), &dbMessage, query, message.Message, id)
 
 	return &dbMessage, err
 }
 
-func (p *Postgres) GetStats(c *gin.Context) (*entity.Statistic, error) {
+func (p *Postgres) GetStats(ctx *gin.Context) (*entity.Statistic, error) {
 	var stats entity.Statistic
 
 	query := `
@@ -90,7 +90,7 @@ func (p *Postgres) GetStats(c *gin.Context) (*entity.Statistic, error) {
 		    (SELECT COUNT(*) FROM messages WHERE marked = false) AS unmarked,
 			(SELECT COUNT(*) FROM messages WHERE marked = true) AS marked;
 	`
-	err := p.db.GetContext(c, &stats, query)
+	err := p.db.GetContext(ctx.Request.Context(), &stats, query)
 
 	return &stats, err
 }

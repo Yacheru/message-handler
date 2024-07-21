@@ -6,7 +6,7 @@ import (
 )
 
 type Message struct {
-	Message string `json:"message"`
+	Message string `json:"message" binding:"required"`
 }
 
 type DBMessage struct {
