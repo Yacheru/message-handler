@@ -23,7 +23,7 @@
 
 2. Ожидаем запуска...
 
-3. `[goose](https://pressly.github.io/goose/installation/) -dir schema postgres 'postgresql://Messaggio:somestrongpassword@localhost:5432/db_messages' up`
+3. [goose](https://pressly.github.io/goose/installation/) -dir schema postgres 'postgresql://Messaggio:somestrongpassword@localhost:5432/db_messages' up
 
 ### Переменные окружения
 
