@@ -6,20 +6,24 @@
 
 ### Ручки:
 
-- POST   /messaggio/               Добавить сообщение
-- GET    /messaggio/               Получить все сообщения
-- GET    /messaggio/stats          Получить статистику по сообщениям
-- GET    /messaggio/:id            Получить сообщение по его UUID 
-- DELETE /messaggio/:id            Удалить сообщение по его UUID
-- PATCH  /messaggio/:id            Изменить сообщение по его UUID
+- Для добавления и изменения, в теле(Body) запроса, нужно использовать: {"message": "сообщение"}
+
+| Метод    | Ручка            | Описание                          |
+|----------|------------------|-----------------------------------|
+| `POST`   | /messaggio/      | Добавить сообщение                |
+| `GET`    | /messaggio/      | Получить все сообщения            |
+| `GET`    | /messaggio/stats | Получить статистику по сообщениям |
+| `GET`    | /messaggio/:id   | Получить сообщение по его UUID    |
+| `DELETE` | /messaggio/:id   | Удалить сообщение по его UUID     |
+| `PATCH`  | /messaggio/:id   | Изменить сообщение по его UUID    |
 
 ### Запуск локально...
 
-1. docker-compose -f ./deploy/docker-compose.yml --env-file ./configs/.env up -d --remove-orphans --build
+1. `docker-compose -f ./deploy/docker-compose.yml --env-file ./configs/.env up -d --remove-orphans --build`
 
 2. Ожидаем запуска...
 
-3. [goose](https://pressly.github.io/goose/installation/) -dir schema postgres 'postgresql://Messaggio:somestrongpassword@localhost:5432/db_messages' up
+3. `[goose](https://pressly.github.io/goose/installation/) -dir schema postgres 'postgresql://Messaggio:somestrongpassword@localhost:5432/db_messages' up`
 
 ### Переменные окружения
 
