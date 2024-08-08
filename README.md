@@ -1,8 +1,8 @@
-### Тестовое задание для Messaggio
+### Message-Handler
 
-*Разработать микросервис на Go, который будет принимать сообщения через HTTP API, сохранять их в PostgreSQL, 
-а затем отправлять в Kafka для дальнейшей обработки. Обработанные сообщения должны помечаться. Сервис должен также 
-предоставлять API для получения статистики по обработанным сообщениям.*
+*Микросервис на Go, принимает сообщения через HTTP API, сохраняет их в PostgreSQL, 
+а затем отправляет в Kafka для дальнейшей обработки. Обработанные сообщения должны помечаются. Сервис также 
+предоставляет API для получения статистики по обработанным сообщениям.*
 
 ### Ручки:
 
@@ -22,8 +22,6 @@
 1. `docker-compose -f ./deploy/docker-compose.yml --env-file ./configs/.env up -d --remove-orphans --build`
 
 2. Ожидаем запуска...
-
-3. [goose](https://pressly.github.io/goose/installation/) -dir schema postgres 'postgresql://Messaggio:somestrongpassword@localhost:5432/db_messages' up
 
 ### Переменные окружения
 

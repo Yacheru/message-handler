@@ -2,6 +2,7 @@ package routes
 
 import (
 	"Messaggio/internal/kafka/consumer"
+	"Messaggio/internal/service"
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -18,9 +19,10 @@ type Route struct {
 }
 
 func NewRoute(ctx context.Context, router *gin.RouterGroup, producer *producer.Producer, db *sqlx.DB, topic []string) *Route {
-	postgres := repository.NewPostgres(db)
-	handler := handlers.NewHandlers(producer, postgres)
-	_ = consumer.NewConsumerGroup(ctx, topic, postgres)
+	repo := repository.NewRepository(db)
+	services := service.NewService(repo)
+	handler := handlers.NewHandlers(producer, services)
+	_ = consumer.NewConsumerGroup(ctx, topic, services)
 
 	return &Route{
 		handlers: handler,

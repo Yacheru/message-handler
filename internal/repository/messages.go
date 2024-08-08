@@ -8,15 +8,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Postgres struct {
+type MessagesPostgres struct {
 	db *sqlx.DB
 }
 
-func NewPostgres(db *sqlx.DB) *Postgres {
-	return &Postgres{db}
+func NewMessagesPostgres(db *sqlx.DB) *MessagesPostgres {
+	return &MessagesPostgres{db}
 }
 
-func (p *Postgres) InsertNew(ctx *gin.Context, message entity.Message) (*entity.DBMessage, error) {
+func (p *MessagesPostgres) InsertNew(ctx *gin.Context, message entity.Message) (*entity.DBMessage, error) {
 	var dbMessage entity.DBMessage
 
 	query := `
@@ -29,7 +29,7 @@ func (p *Postgres) InsertNew(ctx *gin.Context, message entity.Message) (*entity.
 	return &dbMessage, err
 }
 
-func (p *Postgres) GetAll(ctx *gin.Context) ([]entity.DBMessage, error) {
+func (p *MessagesPostgres) GetAll(ctx *gin.Context) ([]entity.DBMessage, error) {
 	var dbMessages []entity.DBMessage
 
 	query := `
@@ -42,7 +42,7 @@ func (p *Postgres) GetAll(ctx *gin.Context) ([]entity.DBMessage, error) {
 	return dbMessages, err
 }
 
-func (p *Postgres) GetById(ctx *gin.Context, id string) (entity.DBMessage, error) {
+func (p *MessagesPostgres) GetById(ctx *gin.Context, id string) (entity.DBMessage, error) {
 	var dbMessage entity.DBMessage
 
 	query := `
@@ -55,7 +55,7 @@ func (p *Postgres) GetById(ctx *gin.Context, id string) (entity.DBMessage, error
 	return dbMessage, err
 }
 
-func (p *Postgres) DeleteMessage(ctx *gin.Context, id string) (entity.DBMessage, error) {
+func (p *MessagesPostgres) DeleteMessage(ctx *gin.Context, id string) (entity.DBMessage, error) {
 	var dbMessage entity.DBMessage
 
 	query := `
@@ -68,7 +68,7 @@ func (p *Postgres) DeleteMessage(ctx *gin.Context, id string) (entity.DBMessage,
 	return dbMessage, err
 }
 
-func (p *Postgres) EditMessage(ctx *gin.Context, id string, message entity.Message) (*entity.DBMessage, error) {
+func (p *MessagesPostgres) EditMessage(ctx *gin.Context, id string, message entity.Message) (*entity.DBMessage, error) {
 	var dbMessage entity.DBMessage
 
 	query := `
@@ -82,7 +82,7 @@ func (p *Postgres) EditMessage(ctx *gin.Context, id string, message entity.Messa
 	return &dbMessage, err
 }
 
-func (p *Postgres) GetStats(ctx *gin.Context) (*entity.Statistic, error) {
+func (p *MessagesPostgres) GetStats(ctx *gin.Context) (*entity.Statistic, error) {
 	var stats entity.Statistic
 
 	query := `
@@ -95,7 +95,7 @@ func (p *Postgres) GetStats(ctx *gin.Context) (*entity.Statistic, error) {
 	return &stats, err
 }
 
-func (p *Postgres) Mark(ctx context.Context, id uuid.UUID) error {
+func (p *MessagesPostgres) Mark(ctx context.Context, id uuid.UUID) error {
 	query := `
 		UPDATE messages 
 		SET marked = true 

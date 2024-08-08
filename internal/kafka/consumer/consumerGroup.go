@@ -1,7 +1,7 @@
 package consumer
 
 import (
-	"Messaggio/internal/repository"
+	"Messaggio/internal/service"
 	"context"
 	"github.com/IBM/sarama"
 	"github.com/sirupsen/logrus"
@@ -11,8 +11,8 @@ import (
 	"Messaggio/pkg/constants"
 )
 
-func NewConsumerGroup(ctx context.Context, topic []string, postgres *repository.Postgres) error {
-	logger.Info("Create a new consumer group...", logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer})
+func NewConsumerGroup(ctx context.Context, topic []string, service *service.Services) error {
+	logger.Info("create a new consumer group...", logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer})
 
 	cfg := sarama.NewConfig()
 
@@ -26,19 +26,20 @@ func NewConsumerGroup(ctx context.Context, topic []string, postgres *repository.
 		return err
 	}
 
-	return Subscribe(ctx, topic, postgres, consumerGroup)
+	return Subscribe(ctx, topic, service, consumerGroup)
 }
 
-func Subscribe(ctx context.Context, topic []string, postgres *repository.Postgres, consumerGroup sarama.ConsumerGroup) error {
-	consumer := NewKafkaConsumer(topic, postgres, ctx)
+func Subscribe(ctx context.Context, topic []string, service *service.Services, consumerGroup sarama.ConsumerGroup) error {
+	consumer := NewKafkaConsumer(topic, service, ctx)
 
-	logger.Info("Starting consumer session...", logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer})
+	logger.Info("starting consumer session...", logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer})
 
 	go func() {
-		for {
-			if err := consumerGroup.Consume(ctx, consumer.Topic, consumer); err != nil {
-				logger.ErrorF("Error start consumer session: %v", logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer}, err.Error())
-			}
+		if err := consumerGroup.Consume(ctx, consumer.Topic, consumer); err != nil {
+			logger.Error(err.Error(), logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer})
+		}
+		if ctx.Err() != nil {
+			return
 		}
 	}()
 

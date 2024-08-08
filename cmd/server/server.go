@@ -3,9 +3,6 @@ package server
 import (
 	"context"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,10 +20,8 @@ type Server struct {
 	HTTPServer *http.Server
 }
 
-func NewServer() (*Server, error) {
-	ctx := context.Background()
-
-	db, err := repository.NewPostgresConnection(config.ServerConfig.PSQLDsn)
+func NewServer(ctx context.Context) (*Server, error) {
+	db, err := repository.NewPostgresConnection(ctx, &config.ServerConfig)
 
 	KafkaProducer, err := producer.NewKafkaProducer([]string{config.ServerConfig.KafkaBroker}, []string{config.ServerConfig.KafkaTopic})
 	if err != nil {
@@ -53,28 +48,12 @@ func NewServer() (*Server, error) {
 
 func (s *Server) Run() error {
 	go func() {
+		logger.Info("starting http server...", logrus.Fields{constants.LoggerCategory: constants.Server})
 		if err := s.HTTPServer.ListenAndServe(); err != nil {
 			logger.Fatal(err.Error(), logrus.Fields{constants.LoggerCategory: constants.Server})
 		}
-		logger.InfoF("server started on :%v port", logrus.Fields{constants.LoggerCategory: constants.Server}, config.ServerConfig.APIPort)
+		logger.InfoF("server started on :%s port", logrus.Fields{constants.LoggerCategory: constants.Server}, config.ServerConfig.APIPort)
 	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-
-	<-quit
-	logger.Info("shutdown server...", logrus.Fields{constants.LoggerCategory: constants.Server})
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := s.HTTPServer.Shutdown(ctx); err != nil {
-		logger.Fatal(err.Error(), logrus.Fields{constants.LoggerCategory: constants.Server})
-
-		return err
-	}
-
-	<-ctx.Done()
 
 	return nil
 }

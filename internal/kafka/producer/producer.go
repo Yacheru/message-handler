@@ -13,7 +13,7 @@ type Producer struct {
 }
 
 func NewKafkaProducer(brokers []string, topics []string) (*Producer, error) {
-	logger.Info("Create a new async producer...", logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer})
+	logger.Info("create a new async producer...", logrus.Fields{constants.LoggerCategory: constants.KafkaConsumer})
 
 	cfg := sarama.NewConfig()
 
@@ -22,7 +22,7 @@ func NewKafkaProducer(brokers []string, topics []string) (*Producer, error) {
 
 	producer, err := sarama.NewAsyncProducer(brokers, cfg)
 	if err != nil {
-		logger.ErrorF("Failed create new producer: %v", logrus.Fields{constants.LoggerCategory: constants.KafkaProducer}, err.Error())
+		logger.ErrorF("failed create new producer: %v", logrus.Fields{constants.LoggerCategory: constants.KafkaProducer}, err.Error())
 
 		return nil, err
 	}

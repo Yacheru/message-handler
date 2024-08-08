@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
 	"github.com/sirupsen/logrus"
+	"os/signal"
+	"syscall"
 
 	"Messaggio/cmd/server"
 	"Messaggio/init/config"
@@ -13,15 +16,25 @@ func init() {
 	if err := config.InitConfig(); err != nil {
 		logger.Fatal(err.Error(), logrus.Fields{constants.LoggerCategory: constants.Config})
 	}
-	logger.Info("Configuration loaded", logrus.Fields{constants.LoggerCategory: constants.Config})
+	logger.Info("configuration loaded", logrus.Fields{constants.LoggerCategory: constants.Config})
 }
 
 func main() {
-	app, err := server.NewServer()
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
+	app, err := server.NewServer(ctx)
 	if err != nil {
-		logger.Fatal("Error create a new http-server", logrus.Fields{constants.LoggerCategory: constants.Server})
+		logger.Error("error create a new http-server", logrus.Fields{constants.LoggerCategory: constants.Server})
+
+		cancel()
 	}
 	if err = app.Run(); err != nil {
-		logger.Fatal("Error run http-server", logrus.Fields{constants.LoggerCategory: constants.Server})
+		logger.Fatal("error run http-server", logrus.Fields{constants.LoggerCategory: constants.Server})
+
+		cancel()
 	}
+
+	<-ctx.Done()
+
+	logger.Info("server shutdown", logrus.Fields{constants.LoggerCategory: constants.Server})
 }

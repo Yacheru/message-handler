@@ -3,7 +3,7 @@ package consumer
 import (
 	"Messaggio/init/logger"
 	"Messaggio/internal/entity"
-	"Messaggio/internal/repository"
+	"Messaggio/internal/service"
 	"Messaggio/pkg/constants"
 	"context"
 	"encoding/json"
@@ -12,16 +12,16 @@ import (
 )
 
 type Consumer struct {
-	Topic    []string
-	postgres *repository.Postgres
-	ctx      context.Context
+	Topic   []string
+	service *service.Services
+	ctx     context.Context
 }
 
-func NewKafkaConsumer(topic []string, postgres *repository.Postgres, ctx context.Context) *Consumer {
+func NewKafkaConsumer(topic []string, service *service.Services, ctx context.Context) *Consumer {
 	return &Consumer{
-		Topic:    topic,
-		postgres: postgres,
-		ctx:      ctx,
+		Topic:   topic,
+		service: service,
+		ctx:     ctx,
 	}
 }
 
@@ -41,7 +41,7 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 					return err
 				}
 
-				err = c.postgres.Mark(c.ctx, dbMessage.ID)
+				err = c.service.Mark(c.ctx, dbMessage.ID)
 				if err != nil {
 					return err
 				}

@@ -4,7 +4,7 @@ import (
 	"Messaggio/init/logger"
 	"Messaggio/internal/entity"
 	"Messaggio/internal/kafka/producer"
-	"Messaggio/internal/repository"
+	"Messaggio/internal/service"
 	"Messaggio/pkg/constants"
 	"database/sql"
 	"encoding/json"
@@ -17,13 +17,13 @@ import (
 
 type Handlers struct {
 	producer *producer.Producer
-	postgres *repository.Postgres
+	service  *service.Services
 }
 
-func NewHandlers(producer *producer.Producer, postgres *repository.Postgres) *Handlers {
+func NewHandlers(producer *producer.Producer, service *service.Services) *Handlers {
 	return &Handlers{
 		producer: producer,
-		postgres: postgres,
+		service:  service,
 	}
 }
 
@@ -35,7 +35,7 @@ func (h *Handlers) InsertNew(ctx *gin.Context) {
 		return
 	}
 
-	dbMessage, err := h.postgres.InsertNew(ctx, message)
+	dbMessage, err := h.service.InsertNew(ctx, message)
 	if err != nil {
 		logger.ErrorF("Error insert message: %v", logrus.Fields{constants.LoggerCategory: constants.Handlers}, err)
 
@@ -57,7 +57,7 @@ func (h *Handlers) InsertNew(ctx *gin.Context) {
 }
 
 func (h *Handlers) GetAll(ctx *gin.Context) {
-	dbMessages, err := h.postgres.GetAll(ctx)
+	dbMessages, err := h.service.GetAll(ctx)
 	logger.InfoF("%v", logrus.Fields{constants.LoggerCategory: constants.Handlers}, dbMessages)
 
 	if err != nil {
@@ -71,7 +71,7 @@ func (h *Handlers) GetAll(ctx *gin.Context) {
 }
 
 func (h *Handlers) GetByID(ctx *gin.Context) {
-	dbMessage, err := h.postgres.GetById(ctx, ctx.Param("id"))
+	dbMessage, err := h.service.GetById(ctx, ctx.Param("id"))
 	logger.InfoF("%v", logrus.Fields{constants.LoggerCategory: constants.Handlers}, dbMessage)
 
 	if err != nil {
@@ -91,7 +91,7 @@ func (h *Handlers) GetByID(ctx *gin.Context) {
 }
 
 func (h *Handlers) DeleteMessage(ctx *gin.Context) {
-	dbMessage, err := h.postgres.DeleteMessage(ctx, ctx.Param("id"))
+	dbMessage, err := h.service.DeleteMessage(ctx, ctx.Param("id"))
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -115,7 +115,7 @@ func (h *Handlers) EditMessage(ctx *gin.Context) {
 		return
 	}
 
-	dbMessage, err := h.postgres.EditMessage(ctx, ctx.Param("id"), message)
+	dbMessage, err := h.service.EditMessage(ctx, ctx.Param("id"), message)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -133,7 +133,7 @@ func (h *Handlers) EditMessage(ctx *gin.Context) {
 }
 
 func (h *Handlers) GetStats(ctx *gin.Context) {
-	stats, err := h.postgres.GetStats(ctx)
+	stats, err := h.service.GetStats(ctx)
 	if err != nil {
 		logger.InfoF("Error get statistic: %v", logrus.Fields{constants.LoggerCategory: constants.Handlers}, err)
 
